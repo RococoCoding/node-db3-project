@@ -85,7 +85,7 @@ router.put('/:id', (req, res) => {
   Schemes.findById(id)
     .then(scheme => {
       if (scheme) {
-        return Schemes.update(changes, id);
+        return Schemes.update(id, changes);
       } else {
         res.status(404).json({ message: 'Could not find scheme with given id' });
       }

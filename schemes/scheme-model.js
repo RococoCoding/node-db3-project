@@ -38,9 +38,12 @@ function findById(id) {
 //   - Resolves to an array of all correctly ordered step for the given scheme: `[ { id: 17, scheme_name: 'Find the Holy Grail', step_number: 1, instructions: 'quest'}, { id: 18, scheme_name: 'Find the Holy Grail', step_number: 2, instructions: '...and quest'}, etc. ]`.
 //   - This array should include the `scheme_name` _not_ the `scheme_id`.
 function findSteps(id) {
-  return db('steps.id', 'steps.instructions', 'steps.step_number', 'schemes.scheme_name')
-    .join('schemes', 'steps.schemes_id', 'schemes.id')
-    .where('scheme.id' === id).orderBy('step_number')
+  console.log(id)
+  return db('steps')
+    .join('schemes', 'steps.scheme_id', 'schemes.id')
+    .select('steps.id', 'steps.instructions', 'steps.step_number', 'schemes.scheme_name')
+    .where('steps.scheme_id', id)
+    .orderBy('step_number')
 }
 
 // - `add(scheme)`:
@@ -60,8 +63,12 @@ function add(scheme) {
 //   - Updates the scheme with the given id.
 //   - Resolves to the newly updated scheme object.
 function update(id, changes) {
-  findById(id).update(changes)
-  return findById(id);
+  return db('schemes')
+    .where({id})
+    .update(changes)
+    .then(res => {
+      return findById(id);
+    })
 }
 
 // - `remove(id)`:
@@ -74,6 +81,7 @@ function remove(id) {
   const removed = findById(id);
   return db('schemes')
   .where({id})
+  .del()
   .then(data => {
     if (!data) {
       return Promise.resolve(null);
